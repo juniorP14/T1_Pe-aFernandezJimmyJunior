@@ -33,17 +33,15 @@ fun DialogoNuevoLibro(
                     val precioNum = precio.toDoubleOrNull() ?: 0.0
                     val cantidadNum = cantidad.toIntOrNull() ?: 0
 
-                    // Validaciones
                     tituloError = titulo.isBlank()
                     precioError = precioNum <= 0
                     cantidadError = cantidadNum <= 0
                     categoriaError = categoria.isBlank()
 
                     if (tituloError || precioError || cantidadError || categoriaError) {
-                        return@TextButton // si hay error, no agregamos
+                        return@TextButton
                     }
 
-                    // Si todo está bien
                     onAgregar(titulo, precioNum, cantidadNum, categoria)
                     onDismiss()
                 }
