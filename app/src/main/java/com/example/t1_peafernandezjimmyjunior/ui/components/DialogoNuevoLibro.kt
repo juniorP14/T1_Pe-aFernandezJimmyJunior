@@ -17,20 +17,35 @@ fun DialogoNuevoLibro(
     var cantidad by remember { mutableStateOf("") }
     var categoria by remember { mutableStateOf("") }
 
-    val categorias = listOf("Novela", "Ciencia", "Historia", "Tecnología","Otro")
+    val categorias = listOf("Novela", "Ciencia", "Historia", "Tecnología")
     var expanded by remember { mutableStateOf(false) }
 
+    var tituloError by remember { mutableStateOf(false) }
+    var precioError by remember { mutableStateOf(false) }
+    var cantidadError by remember { mutableStateOf(false) }
+    var categoriaError by remember { mutableStateOf(false) }
+
     AlertDialog(
-        onDismissRequest = {onDismiss()} ,
+        onDismissRequest = { onDismiss() },
         confirmButton = {
             TextButton(
                 onClick = {
                     val precioNum = precio.toDoubleOrNull() ?: 0.0
                     val cantidadNum = cantidad.toIntOrNull() ?: 0
-                    if (titulo.isBlank() || precioNum <= 0 || cantidadNum <= 0 || categoria.isBlank()) {
-                        return@TextButton
+
+                    // Validaciones
+                    tituloError = titulo.isBlank()
+                    precioError = precioNum <= 0
+                    cantidadError = cantidadNum <= 0
+                    categoriaError = categoria.isBlank()
+
+                    if (tituloError || precioError || cantidadError || categoriaError) {
+                        return@TextButton // si hay error, no agregamos
                     }
+
+                    // Si todo está bien
                     onAgregar(titulo, precioNum, cantidadNum, categoria)
+                    onDismiss()
                 }
             ) { Text("Agregar") }
         },
@@ -40,24 +55,39 @@ fun DialogoNuevoLibro(
         title = { Text("Agregar Libro") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+
                 OutlinedTextField(
                     value = titulo,
                     onValueChange = { titulo = it },
                     label = { Text("Título") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = tituloError
                 )
+                if (tituloError) {
+                    Text("El título no puede estar vacío", color = MaterialTheme.colorScheme.error)
+                }
+
                 OutlinedTextField(
                     value = precio,
                     onValueChange = { precio = it },
                     label = { Text("Precio") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = precioError
                 )
+                if (precioError) {
+                    Text("El precio debe ser mayor a 0", color = MaterialTheme.colorScheme.error)
+                }
+
                 OutlinedTextField(
                     value = cantidad,
                     onValueChange = { cantidad = it },
                     label = { Text("Cantidad") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = cantidadError
                 )
+                if (cantidadError) {
+                    Text("La cantidad debe ser mayor a 0", color = MaterialTheme.colorScheme.error)
+                }
 
                 ExposedDropdownMenuBox(
                     expanded = expanded,
@@ -69,11 +99,13 @@ fun DialogoNuevoLibro(
                         readOnly = true,
                         label = { Text("Categoría") },
                         modifier = Modifier
+                            .menuAnchor()
                             .fillMaxWidth(),
                         trailingIcon = {
                             ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
                         },
-                        colors = ExposedDropdownMenuDefaults.textFieldColors()
+                        colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                        isError = categoriaError
                     )
 
                     ExposedDropdownMenu(
@@ -90,6 +122,9 @@ fun DialogoNuevoLibro(
                             )
                         }
                     }
+                }
+                if (categoriaError) {
+                    Text("Debe seleccionar una categoría", color = MaterialTheme.colorScheme.error)
                 }
             }
         }
